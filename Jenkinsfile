@@ -28,10 +28,8 @@ pipeline{
         }
         stage('Deploy') {
             steps {
-            sh 'fuser -k 3000/tcp 2>/dev/null || true'
-            sh 'BUILD_ID=dontKillMe nohup ./gopro > app.log 2>&1 &'
-            sh 'sleep 3'
-            sh 'cat app.log'
+            sh 'nohup ./gopro &'
+            
         }
         }   
     }
