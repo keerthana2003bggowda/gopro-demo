@@ -6,6 +6,8 @@ pipeline{
         stage('Checkout') {
             steps{
                 git branch: 'main',
+                credentialsId: 'github-pat',
+                    url: 'https://github.com/keerthana2003bggowda/gopro-demo.git'
 
             }
 
@@ -16,10 +18,10 @@ pipeline{
             }
         }
         stage('Deploy') {
-    steps {
-        sh 'nohup ./gopro &'
-    }
-}
+            steps {
+            sh 'nohup ./gopro &'
+        }
+        }   
     }
     post {
         success {
