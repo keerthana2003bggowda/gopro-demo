@@ -1,6 +1,10 @@
 pipeline{
     agent {label 'go'}
 
+    environment {
+    PATH = "/usr/local/go/bin:${env.PATH}"
+    }
+
     stages {
 
         stage('Checkout') {
