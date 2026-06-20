@@ -36,8 +36,8 @@ func main() {
 	http.HandleFunc("/form", formHandler)
 	http.HandleFunc("/hello", helloHandler)
 
-	fmt.Printf("Starting server at port 3000\n")
-	if err := http.ListenAndServe(":3000", nil); err != nil {
+	fmt.Printf("Starting server at port 3001\n")
+	if err := http.ListenAndServe(":3001", nil); err != nil {
 		log.Fatal(err)
 	}
 }
