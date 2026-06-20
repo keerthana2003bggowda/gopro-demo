@@ -23,7 +23,7 @@ pipeline{
         }
         stage('Deploy') {
             steps {
-            sh 'kill -9 $(pgrep -f gopro) 2>/dev/null || true'
+            fuser -k 3000/tcp 2>/dev/null || true
             sh 'nohup ./gopro > app.log 2>&1 &'
             sh 'sleep 3'
             sh 'cat app.log'
