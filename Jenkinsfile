@@ -5,6 +5,11 @@ pipeline{
     PATH = "/usr/local/go/bin:${env.PATH}"
     }
 
+     triggers {
+        pollSCM('H/1 * * * *')
+    }
+
+
     stages {
 
         stage('Checkout') {
