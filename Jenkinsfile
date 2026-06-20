@@ -23,6 +23,7 @@ pipeline{
         }
         stage('Deploy') {
             steps {
+            sh 'pkill -f gopro || true'
             sh 'nohup ./gopro &'
         }
         }   
