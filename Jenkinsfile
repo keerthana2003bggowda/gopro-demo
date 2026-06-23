@@ -24,6 +24,14 @@ pipeline{
                 sh 'go build -o gopro main.go'
             }
         }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonarqube') {
+                    sh "${tool('sonar-scanner')}/bin/sonar-scanner"
+                }
+            }
+        }
         stage('Deploy') {
             steps {
             sh 'nohup ./gopro &'
