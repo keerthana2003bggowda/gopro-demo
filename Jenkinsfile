@@ -4,7 +4,7 @@ pipeline{
     environment {
     PATH = "/usr/local/go/bin:${env.PATH}"
         JFROG_CREDS = credentials('artifactory-creds')
-        JFROG_URL = 'http://13.232.193.183:8082/artifactory/go-artifacts'
+        JFROG_URL = 'http://13.233.212.44:8082/artifactory/go-artifacts'
     }
 
      
