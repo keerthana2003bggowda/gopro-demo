@@ -1,8 +1,10 @@
 FROM golang:1.26.4 AS build
 WORKDIR /app
 COPY . .
-RUN go build -o main .
+RUN CGO_ENABLED=0 go build -o main .
 
 FROM alpine:latest
+WORKDIR /app
 COPY --from=build /app/main .
-CMD ["./main"] 
+EXPOSE 8080
+CMD ["./main"]
