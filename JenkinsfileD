@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'agent2' }
+    agent { label 'go' }
     environment {
         IMAGE = 'docker.io/keerthana2003bggowd/gopro-demo'
         TAG = "${BUILD_NUMBER}"
