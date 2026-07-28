@@ -1,0 +1,69 @@
+pipeline {
+    agent { label 'go' }
+    environment {
+        IMAGE = 'docker.io/keerthana2003bggowd/gopro-demo'
+        TAG = "${BUILD_NUMBER}"
+        CONTAINER = 'gopro-demo'
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    credentialsId: 'github-pat',
+                    url: 'https://github.com/keerthana2003bggowda/gopro-demo.git'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'docker build -t "$IMAGE:$TAG" -t "$IMAGE:latest" .'
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonarqube') {
+                    sh "${tool('sonar-scanner')}/bin/sonar-scanner"
+                }
+            }
+        }
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+        stage('Push') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', passwordVariable: 'DOCKERHUB_PWD', usernameVariable: 'DOCKERHUB_USER')]) {
+                    sh 'echo "$DOCKERHUB_PWD" | docker login -u "$DOCKERHUB_USER" --password-stdin'
+                    sh 'docker push "$IMAGE:$TAG"'
+                    sh 'docker push "$IMAGE:latest"'
+                }
+            }
+        }
+         stage('Push to JFrog Artifactory') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'artifactory-creds', passwordVariable: 'ARTIFACTORY_PWD', usernameVariable: 'ARTIFACTORY_USER')]) {
+                    sh '''
+                        docker tag "$IMAGE:$TAG" "$ARTIFACTORY_IMAGE:$TAG"
+                        docker tag "$IMAGE:latest" "$ARTIFACTORY_IMAGE:latest"
+                        echo "$ARTIFACTORY_PWD" | docker login "$ARTIFACTORY_DOCKER_REGISTRY" -u "$ARTIFACTORY_USER" --password-stdin
+                        docker push "$ARTIFACTORY_IMAGE:$TAG"
+                        docker push "$ARTIFACTORY_IMAGE:latest"
+                    '''
+                }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh 'kubectl apply -f k8s-deploy.yaml'
+            }
+        }
+        
+    }
+    post {
+        success { echo "Build ${env.BUILD_NUMBER} succeeded" }
+        failure { echo "Build ${env.BUILD_NUMBER} failed" }
+        
+    }
+}
