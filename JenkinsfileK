@@ -4,6 +4,8 @@ pipeline {
         IMAGE = 'docker.io/keerthana2003bggowd/gopro-demo'
         TAG = "${BUILD_NUMBER}"
         CONTAINER = 'gopro-demo'
+        ARTIFACTORY_DOCKER_REGISTRY = '15.206.165.22:8081/artifactory/api/docker/docker-local'
+        ARTIFACTORY_IMAGE = "${ARTIFACTORY_DOCKER_REGISTRY}/gopro-demo"
     }
     stages {
         stage('Checkout') {
