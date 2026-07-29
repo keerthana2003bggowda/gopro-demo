@@ -17,7 +17,7 @@ spec:
           image: keerthana2003bggowd/gopro-demo:latest
           imagePullPolicy: Always
           ports:
-            containerPort: 3001
+            - containerPort: 3001
 ---
 
 apiVersion: v1
