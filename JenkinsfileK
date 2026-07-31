@@ -37,7 +37,19 @@ pipeline {
                 }
             }
         }
-         
+        //  stage('Push to JFrog Artifactory') {
+        //     steps {
+        //         withCredentials([usernamePassword(credentialsId: 'artifactory-creds', passwordVariable: 'ARTIFACTORY_PWD', usernameVariable: 'ARTIFACTORY_USER')]) {
+        //             sh '''
+        //                 docker tag "$IMAGE:$TAG" "$ARTIFACTORY_IMAGE:$TAG"
+        //                 docker tag "$IMAGE:latest" "$ARTIFACTORY_IMAGE:latest"
+        //                 echo "$ARTIFACTORY_PWD" | docker login "$ARTIFACTORY_DOCKER_REGISTRY" -u "$ARTIFACTORY_USER" --password-stdin
+        //                 docker push "$ARTIFACTORY_IMAGE:$TAG"
+        //                 docker push "$ARTIFACTORY_IMAGE:latest"
+        //             '''
+        //         }
+        //     }
+        // }
         stage('Deploy') {
             steps {
                 sh 'kubectl apply -f k8s-deploy.yaml'

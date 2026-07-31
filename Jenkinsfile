@@ -34,17 +34,18 @@ pipeline{
                 }
             }
         }
-        stage('Deploy') {
-            steps {
-            sh 'nohup ./gopro &'
-            
-        }
+        
         
         }   
         stage('Publish to JFrog') {
             steps {
                 sh 'curl -u $JFROG_CREDS_USR:$JFROG_CREDS_PSW -T gopro "${JFROG_URL}/gopro-${BUILD_NUMBER}"'
             }
+        }
+        stage('Deploy') {
+            steps {
+            sh 'nohup ./gopro &'
+            
         }
     }
     post {

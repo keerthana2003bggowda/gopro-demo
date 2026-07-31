@@ -44,3 +44,38 @@ gopro-demo/
 ├── JenkinsfileD                # Secondary pipeline definition (see note below)
 ├── sonar-project.properties    # SonarQube scanner configuration
 └── README.md
+
+
+## CI/CD Pipeline — VM Deployment (gopro-demo)
+
+**Agent:** `go`
+
+### Environment Variables
+| Variable | Value |
+|----------|-------|
+| `PATH` | Prepends `/usr/local/go/bin` to existing `PATH` |
+| `JFROG_CREDS` | Bound from `artifactory-creds` (exposes `_USR` / `_PSW`) |
+| `JFROG_URL` | `http://13.233.212.44:8082/artifactory/go-artifacts` |
+
+### Pipeline Stages
+
+| Stage | Description |
+|-------|-------------|
+| **Checkout** | Pulls `main` branch from GitHub using `github-pat` credentials |
+| **Build** | Compiles Go binary: `go build -o gopro main.go` |
+| **SonarQube Analysis** | Runs code quality scan via `sonar-scanner` under `sonarqube` server config |
+| **Publish to JFrog** | Uploads `gopro` binary to Artifactory via `curl`, versioned by `BUILD_NUMBER` |
+| **Deploy** | Runs compiled binary in background: `nohup ./gopro &` |
+
+
+### Prerequisites
+- Jenkins credentials configured: `github-pat`, `artifactory-creds`
+- Go toolchain installed at `/usr/local/go` on `go` agent
+- `sonar-scanner` tool configured in Jenkins Global Tool Config
+- `sonarqube` server configured under Manage Jenkins → System
+
+### Notes
+- Deployment type: **VM-based**
+- Artifact: raw Go binary named `gopro-<BUILD_NUMBER>` (no extension/archive)
+- Uses `credentials()` helper (top-level env binding) instead of `withCredentials{}` block — credentials are available for the whole pipeline duration, not scoped to a single stage
+
