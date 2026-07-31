@@ -34,11 +34,11 @@ pipeline {
                 sh 'docker run -d --name "$CONTAINER" -p 8081:3001 "$IMAGE:$TAG"'
             }
         }
-        stage('Test') {
-            steps {
-                sh 'sleep 2; echo "Hit http://localhost:8081 to see the app."'
-            }
-        }
+        // stage('Test') {
+        //     steps {
+        //         sh 'sleep 2; echo "Hit http://localhost:8081 to see the app."'
+        //     }
+        // }
         stage('Cleanup') {
             steps {
                 cleanWs()

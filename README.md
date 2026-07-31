@@ -79,3 +79,71 @@ gopro-demo/
 - Artifact: raw Go binary named `gopro-<BUILD_NUMBER>` (no extension/archive)
 - Uses `credentials()` helper (top-level env binding) instead of `withCredentials{}` block — credentials are available for the whole pipeline duration, not scoped to a single stage
 
+
+## CI/CD Pipeline — Docker Deployment (gopro-demo)
+
+**Agent:** `go`
+
+### Environment Variables
+| Variable | Value |
+|----------|-------|
+| `IMAGE` | `docker.io/keerthana2003bggowd/gopro-demo` |
+| `TAG` | `${BUILD_NUMBER}` |
+| `CONTAINER` | `gopro-demo` |
+
+### Pipeline Stages
+
+| Stage | Description |
+|-------|-------------|
+| **Checkout** | Pulls `main` branch from GitHub using `github-pat` credentials |
+| **Build** | Builds Docker image, tagged with both `BUILD_NUMBER` and `latest` |
+| **Push** | Logs into Docker Hub using `dockerhub-creds`, pushes both tags |
+| **Deploy** | Pulls freshly built image, removes existing container, runs new container mapping host `8081` → container `3001` |
+| **Cleanup** | Cleans Jenkins workspace after pipeline run |
+
+### Prerequisites
+- Jenkins credentials configured: `github-pat`, `dockerhub-creds`
+- Docker installed on `go` agent, Jenkins user has Docker permissions
+- Dockerfile present at repo root (app listens on port `3001` internally)
+
+### Notes
+- Deployment type: **Docker-based**
+- Port mapping **8081:3001** — differs from VM variant, which doesn't document a port at all; worth confirming Go app's actual listen port matches `3001` here
+- Container force-removed before redeploy — clean state, no port conflicts
+
+## CI/CD Pipeline — Kubernetes Deployment (gopro-demo)
+
+**Agent:** `go`
+
+### Environment Variables
+| Variable | Value |
+|----------|-------|
+| `IMAGE` | `docker.io/keerthana2003bggowd/gopro-demo` |
+| `TAG` | `${BUILD_NUMBER}` |
+| `CONTAINER` | `gopro-demo` |
+| `ARTIFACTORY_DOCKER_REGISTRY` | `15.206.165.22:8081/artifactory/api/docker/docker-local` |
+| `ARTIFACTORY_IMAGE` | `${ARTIFACTORY_DOCKER_REGISTRY}/gopro-demo` |
+
+### Pipeline Stages
+
+| Stage | Description |
+|-------|-------------|
+| **Checkout** | Pulls `main` branch from GitHub using `github-pat` credentials |
+| **Build** | Builds Docker image, tagged with both `BUILD_NUMBER` and `latest` |
+| **SonarQube Analysis** | Runs code quality scan via `sonar-scanner` under `sonarqube` server config |
+| **Push** | Logs into Docker Hub using `dockerhub-creds`, pushes both tags |
+| **Deploy** | Applies `k8s-deploy.yaml` manifest to Kubernetes cluster via `kubectl apply` |
+
+
+
+### Prerequisites
+- Jenkins credentials configured: `github-pat`, `dockerhub-creds` (and `artifactory-creds` if JFrog stage is re-enabled)
+- Docker installed on `go` agent, Jenkins user has Docker permissions
+- `sonar-scanner` tool configured in Jenkins Global Tool Config
+- `sonarqube` server configured under Manage Jenkins → System
+- `kubectl` installed and configured on agent with cluster access (kubeconfig)
+- `k8s-deploy.yaml` manifest present in repo, references `$IMAGE:$TAG` or `latest`
+
+### Notes
+- Deployment type: **Kubernetes-based**
+
